@@ -1,15 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Creative Brief</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #f2f0eb;
+      --red: #e63022;
+      --grey: #2a2a2a;
+      --mid: #888;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container { max-width: 720px; width: 100%; }
+
+    button {
+      background: var(--red);
+      color: var(--white);
+      border: none;
+      padding: 1rem 2rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .brief-container { display: none; margin-top: 2rem; }
+    .brief-container.visible { display: block; }
+
+    .error-msg {
+      display: none;
+      margin-top: 1rem;
+      color: var(--red);
+    }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Daily Creative Brief</h1>
+  <button id="btn" onclick="getBrief()">Generate Brief</button>
+
+  <div class="brief-container" id="briefContainer">
+    <div id="briefDate"></div>
+    <div id="briefBody"></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg">
+    Failed to generate brief. Please try again.
+  </div>
+
+  <div id="footerDate"></div>
+</div>
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+
   const WEBHOOK_URL = 'https://nallym.app.n8n.cloud/webhook/233c5fb1-5d05-41cf-b786-6e63a5efd06e';
 
-  document.getElementById('footerDate').textContent =
-    new Date().toLocaleDateString('en-IE', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const footerDateEl = document.getElementById('footerDate');
+  if (footerDateEl) {
+    footerDateEl.textContent =
+      new Date().toLocaleDateString('en-IE', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+  }
 
-  async function getBrief() {
+  window.getBrief = async function() {
     const btn = document.getElementById('btn');
     const briefContainer = document.getElementById('briefContainer');
     const briefBody = document.getElementById('briefBody');
@@ -17,9 +95,8 @@
     const errorMsg = document.getElementById('errorMsg');
 
     btn.disabled = true;
-    btn.classList.add('loading');
-    briefContainer.classList.remove('visible');
     errorMsg.classList.remove('visible');
+    briefContainer.classList.remove('visible');
 
     try {
       const res = await fetch(WEBHOOK_URL, {
@@ -29,9 +106,8 @@
       if (!res.ok) throw new Error('Request failed');
 
       const text = await res.text();
-      const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-      briefBody.innerHTML = formatted;
+      briefBody.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       briefDate.textContent =
         new Date().toLocaleTimeString('en-IE', {
           hour: '2-digit',
@@ -44,7 +120,11 @@
       errorMsg.classList.add('visible');
     } finally {
       btn.disabled = false;
-      btn.classList.remove('loading');
     }
-  }
+  };
+
+});
 </script>
+
+</body>
+</html>
