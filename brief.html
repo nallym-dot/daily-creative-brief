@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Creative Brief</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #f2f0eb;
+      --red: #e63022;
+      --grey: #2a2a2a;
+      --mid: #888;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.015) 2px,
+        rgba(255,255,255,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 720px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      border-bottom: 1px solid var(--grey);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      color: var(--white);
+    }
+
+    h1 span {
+      color: var(--red);
+    }
+
+    .subtitle {
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--mid);
+      line-height: 1.6;
+    }
+
+    .trigger-zone {
+      margin-bottom: 2.5rem;
+    }
+
+    button {
+      background: var(--red);
+      color: var(--white);
+      border: none;
+      padding: 1rem 2rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    button:hover { background: #c4261a; }
+    button:active { transform: scale(0.98); }
+
+    button:disabled {
+      background: var(--grey);
+      color: var(--mid);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    button.loading .spinner { display: block; }
+    button.loading .btn-text::after { content: '...'; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .brief-container {
+      display: none;
+      border: 1px solid var(--grey);
+      position: relative;
+    }
+
+    .brief-container.visible { display: block; }
+
+    .brief-header {
+      background: var(--grey);
+      padding: 0.6rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brief-header span {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--mid);
+    }
+
+    .brief-date {
+      font-size: 0.6rem;
+      color: var(--mid);
+    }
+
+    .brief-body {
+      padding: 2rem;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: var(--white);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .brief-body strong, .brief-body b {
+      color: var(--red);
+      font-weight: 500;
+    }
+
+    .error-msg {
+      display: none;
+      padding: 1rem;
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-size: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .error-msg.visible { display: block; }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--grey);
+      font-size: 0.6rem;
+      color: var(--mid);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <p class="label">Design Challenge System</p>
+      <h1>Daily<br>Creative<span>.</span><br>Brief</h1>
+      <p class="subtitle">Random constraints. One hour. Make something real.</p>
+    </header>
+
+    <div class="trigger-zone">
+      <button id="btn" onclick="getBrief()">
+        <div class="spinner"></div>
+        <span class="btn-text">Generate Brief</span>
+      </button>
+    </div>
+
+    <div class="brief-container" id="briefContainer">
+      <div class="brief-header">
+        <span>Brief</span>
+        <span class="brief-date" id="briefDate"></span>
+      </div>
+      <div class="brief-body" id="briefBody"></div>
+    </div>
+
+    <div class="error-msg" id="errorMsg">
+      Failed to generate brief. Please try again.
+    </div>
+
+    <footer>
+      <span>One brief. One hour. No excuses.</span>
+      <span id="footerDate"></span>
+    </footer>
+  </div>
+
+  <script>
+    const WEBHOOK_URL = 'https://nallym.app.n8n.cloud/webhook/233c5fb1-5d05-41cf-b786-6e63a5efd06e';
+
+    document.getElementById('footerDate').textContent = new Date().toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    async function getBrief() {
+      const btn = document.getElementById('btn');
+      const briefContainer = document.getElementById('briefContainer');
+      const briefBody = document.getElementById('briefBody');
+      const briefDate = document.getElementById('briefDate');
+      const errorMsg = document.getElementById('errorMsg');
+
+      btn.disabled = true;
+      btn.classList.add('loading');
+      briefContainer.classList.remove('visible');
+      errorMsg.classList.remove('visible');
+
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ trigger: 'manual' })
+        });
+
+        if (!res.ok) throw new Error('Request failed');
+
+        const text = await res.text();
+        const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        briefBody.innerHTML = formatted;
+        briefDate.textContent = new Date().toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit' });
+        briefContainer.classList.add('visible');
+
+      } catch (err) {
+        errorMsg.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+      }
+    }
+  </script>
+</body>
+</html>
